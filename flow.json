@@ -822,13 +822,13 @@
               "input_types": []
             },
             "api_key": {
-              "load_from_db": true,
+              "load_from_db": false,
               "override_skip": false,
               "required": false,
               "placeholder": "",
               "show": true,
               "name": "api_key",
-              "value": "GEMINI",
+              "value": "",
               "display_name": "Google API Key",
               "advanced": false,
               "input_types": [],
@@ -958,7 +958,7 @@
             }
           },
           "tool_mode": false,
-          "last_updated": "2025-12-09T04:47:30.876Z",
+          "last_updated": "2025-12-09T06:53:53.332Z",
           "lf_version": "1.7.0"
         },
         "selected_output": "response",
@@ -975,7 +975,7 @@
         "x": 1641.6239626366948,
         "y": 301.10345101561927
       },
-      "selected": true,
+      "selected": false,
       "type": "genericNode"
     },
     {
@@ -1275,7 +1275,7 @@
   "edges": [
     {
       "animated": false,
-      "className": "not-running",
+      "className": "",
       "data": {
         "sourceHandle": {
           "dataType": "Agent",

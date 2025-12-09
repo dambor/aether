@@ -20,7 +20,7 @@ class InputData(BaseModel):
     session_id: str = ''
     # tweaks: dict[str, dict[str, str]] = {}
 
-def main():
+def main(input_value=''):
     chatinput_1 = ChatInput()
     agentcomponent_1 = AgentComponent()
     chatoutput_1 = ChatOutput()
@@ -28,6 +28,7 @@ def main():
     # Wiring components together
     chatinput_1.set(
         code='from lfx.base.data.utils import IMG_FILE_TYPES, TEXT_FILE_TYPES\nfrom lfx.base.io.chat import ChatComponent\nfrom lfx.inputs.inputs import BoolInput\nfrom lfx.io import (\n    DropdownInput,\n    FileInput,\n    MessageTextInput,\n    MultilineInput,\n    Output,\n)\nfrom lfx.schema.message import Message\nfrom lfx.utils.constants import (\n    MESSAGE_SENDER_AI,\n    MESSAGE_SENDER_NAME_USER,\n    MESSAGE_SENDER_USER,\n)\n\n\nclass ChatInput(ChatComponent):\n    display_name = "Chat Input"\n    description = "Get chat inputs from the Playground."\n    documentation: str = "https://docs.langflow.org/chat-input-and-output"\n    icon = "MessagesSquare"\n    name = "ChatInput"\n    minimized = True\n\n    inputs = [\n        MultilineInput(\n            name="input_value",\n            display_name="Input Text",\n            value="",\n            info="Message to be passed as input.",\n            input_types=[],\n        ),\n        BoolInput(\n            name="should_store_message",\n            display_name="Store Messages",\n            info="Store the message in the history.",\n            value=True,\n            advanced=True,\n        ),\n        DropdownInput(\n            name="sender",\n            display_name="Sender Type",\n            options=[MESSAGE_SENDER_AI, MESSAGE_SENDER_USER],\n            value=MESSAGE_SENDER_USER,\n            info="Type of sender.",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name="sender_name",\n            display_name="Sender Name",\n            info="Name of the sender.",\n            value=MESSAGE_SENDER_NAME_USER,\n            advanced=True,\n        ),\n        MessageTextInput(\n            name="session_id",\n            display_name="Session ID",\n            info="The session ID of the chat. If empty, the current session ID parameter will be used.",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name="context_id",\n            display_name="Context ID",\n            info="The context ID of the chat. Adds an extra layer to the local memory.",\n            value="",\n            advanced=True,\n        ),\n        FileInput(\n            name="files",\n            display_name="Files",\n            file_types=TEXT_FILE_TYPES + IMG_FILE_TYPES,\n            info="Files to be sent with the message.",\n            advanced=True,\n            is_list=True,\n            temp_file=True,\n        ),\n    ]\n    outputs = [\n        Output(display_name="Chat Message", name="message", method="message_response"),\n    ]\n\n    async def message_response(self) -> Message:\n        # Ensure files is a list and filter out empty/None values\n        files = self.files if self.files else []\n        if files and not isinstance(files, list):\n            files = [files]\n        # Filter out None/empty values\n        files = [f for f in files if f is not None and f != ""]\n\n        session_id = self.session_id or self.graph.session_id or ""\n        message = await Message.create(\n            text=self.input_value,\n            sender=self.sender,\n            sender_name=self.sender_name,\n            session_id=session_id,\n            context_id=self.context_id,\n            files=files,\n        )\n        if session_id and isinstance(message, Message) and self.should_store_message:\n            stored_message = await self.send_message(\n                message,\n            )\n            self.message.value = stored_message\n            message = stored_message\n\n        self.status = message\n        return message\n',
+        input_value=input_value,
         sender='User',
         sender_name='User',
         should_store_message=True,
@@ -47,7 +48,6 @@ def main():
         _frontend_node_flow_id='2d048680-1707-442a-8a36-41729c61d5f6',
         _frontend_node_folder_id='1616c583-f98d-4cce-b986-d6a22ab34202',
         model_name='gemini-2.5-pro',
-        api_key=os.getenv('GEMINI', 'GEMINI'),
         temperature=0.1,
         tool_model_enabled=True,
         input_value=chatinput_1.message_response,
@@ -68,10 +68,8 @@ def main():
 @app.post('/run')
 async def run_flow(data: InputData):
     try:
-        graph = main()
-        
-        # Prepare graph to identify vertices
-        graph.prepare()
+        input_value = data.inputs.get('input_value', '') if data.inputs else ''
+        graph = main(input_value=input_value)
         
         # Handle Session ID for memory
         if data.session_id:
@@ -82,11 +80,9 @@ async def run_flow(data: InputData):
                     vertex.update_raw_params({'session_id': data.session_id})
         
         results = []
-        # Prepare inputs as list of dicts for graph.async_start
-        inputs_list = [data.inputs] if data.inputs else []
 
         # Run the graph and collect results
-        async for result in graph.async_start(inputs=inputs_list):
+        async for result in graph.async_start():
             if hasattr(result, 'vertex'):
                  # Serialize result
                  try:
