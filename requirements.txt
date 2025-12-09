@@ -1,0 +1,11 @@
+python-dotenv
+langchain-core
+httpx
+pydantic
+loguru
+rich
+fastapi
+uvicorn
+# Add your component dependencies below (e.g. openai, langchain-openai)
+openai
+langchain
