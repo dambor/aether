@@ -1,4 +1,6 @@
 python-dotenv
+lfx @ git+https://github.com/langflow-ai/langflow.git#subdirectory=src/lfx
+langflow-base
 langchain-core
 httpx
 pydantic
@@ -6,6 +8,7 @@ loguru
 rich
 fastapi
 uvicorn
+sqlalchemy
 # Add your component dependencies below (e.g. openai, langchain-openai)
 openai
 langchain
