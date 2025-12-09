@@ -2,17 +2,19 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    software-properties-common \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+# Ensure logs are visible in Cloud Run
+ENV PYTHONUNBUFFERED=1
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install system dependencies
+RUN apt-get update && apt-get install -y git gcc && rm -rf /var/lib/apt/lists/*
+
+RUN pip install uvicorn
 
 COPY . .
 
+# Cloud Run uses PORT environment variable
+ENV PORT=8080
+EXPOSE 8080
+
+# Run the application using the generated main.py which handles env vars
 CMD ["python", "main.py"]

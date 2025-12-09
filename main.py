@@ -1,17 +1,30 @@
 import patch_langflow
-from components.agentcomponent_Agent import AgentComponent
-from components.chatinput_ChatI import ChatInput
-from components.chatoutput_ChatO import ChatOutput
-from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
-from lfx.graph import Graph
-from pydantic import BaseModel
-import asyncio
-import json
-import os
-import uvicorn
+import sys
+import traceback
+print('--- Starting main.py ---', flush=True)
+try:
+    import patch_langflow
+    print('Patch loaded', flush=True)
+    from components.agentcomponent_Agent import AgentComponent
+    from components.chatinput_ChatI import ChatInput
+    from components.chatoutput_ChatO import ChatOutput
+    from dotenv import load_dotenv
+    from fastapi import FastAPI, HTTPException
+    from lfx.graph import Graph
+    from pydantic import BaseModel
+    import asyncio
+    import json
+    import os
+    import uvicorn
+    # Component imports
+    print('Imports completed', flush=True)
+except Exception as e:
+    print(f'CRITICAL ERROR during imports: {e}', flush=True)
+    traceback.print_exc()
+    sys.exit(1)
 
 load_dotenv()
+print('Env loaded', flush=True)
 
 app = FastAPI(title='Langflow Export', version='1.0')
 
@@ -48,6 +61,7 @@ def main(input_value=''):
         _frontend_node_flow_id='2d048680-1707-442a-8a36-41729c61d5f6',
         _frontend_node_folder_id='1616c583-f98d-4cce-b986-d6a22ab34202',
         model_name='gemini-2.5-pro',
+        api_key=os.getenv('GEMINI', 'GEMINI'),
         temperature=0.1,
         tool_model_enabled=True,
         input_value=chatinput_1.message_response,
@@ -107,5 +121,18 @@ async def run_flow(data: InputData):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get('/health')
+async def health_check():
+    return {'status': 'healthy'}
+
 if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=8000)
+    try:
+        port = int(os.getenv('PORT', 8080))
+        print(f"Starting Langflow exported app on 0.0.0.0:{port}")
+        uvicorn.run(app, host='0.0.0.0', port=port)
+    except Exception as e:
+        print(f"Failed to start application: {e}")
+        import traceback
+        traceback.print_exc()
+        import sys
+        sys.exit(1)

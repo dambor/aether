@@ -792,7 +792,6 @@
                 "gemini-2.5-flash-lite",
                 "gemini-2.5-flash-image",
                 "gemini-2.5-computer-use-preview-10-2025",
-                "gemini-2.0-pro-exp",
                 "gemini-2.0-flash-lite-preview",
                 "gemini-2.0-flash-lite",
                 "gemini-2.0-flash-exp",
@@ -822,13 +821,13 @@
               "input_types": []
             },
             "api_key": {
-              "load_from_db": false,
+              "load_from_db": true,
               "override_skip": false,
               "required": false,
               "placeholder": "",
               "show": true,
               "name": "api_key",
-              "value": "",
+              "value": "GEMINI",
               "display_name": "Google API Key",
               "advanced": false,
               "input_types": [],
@@ -958,7 +957,7 @@
             }
           },
           "tool_mode": false,
-          "last_updated": "2025-12-09T06:53:53.332Z",
+          "last_updated": "2025-12-09T15:16:05.479Z",
           "lf_version": "1.7.0"
         },
         "selected_output": "response",
@@ -1333,8 +1332,8 @@
     }
   ],
   "viewport": {
-    "x": -1010.7799013143099,
-    "y": -200.89013561739569,
-    "zoom": 0.8706803172076636
+    "x": -1363.2549377701744,
+    "y": -330.04146417281424,
+    "zoom": 1.2289512555391433
   }
 }
